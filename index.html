@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Queens Visualizer — Brute Force vs Backtracking</title>
+    <meta name="description" content="Simulasi interaktif N-Queens Problem: perbandingan algoritma Brute Force vs Backtracking dengan visualisasi step-by-step">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Hero Header -->
+    <header class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="badge">Strategi Algoritma</div>
+            <h1>N-Queens <span class="gradient-text">Visualizer</span></h1>
+            <p class="hero-subtitle">Perbandingan Interaktif: <strong>Brute Force</strong> vs <strong>Backtracking</strong></p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Controls Panel -->
+        <section class="controls-panel" id="controls-panel">
+            <div class="controls-header">
+                <h2>⚙️ Pengaturan</h2>
+            </div>
+            <div class="controls-body">
+                <div class="control-group">
+                    <label for="board-size">Ukuran Papan (N)</label>
+                    <div class="slider-container">
+                        <input type="range" id="board-size" min="4" max="10" value="5" class="slider">
+                        <span class="slider-value" id="board-size-value">5</span>
+                    </div>
+                    <p class="control-hint">N = jumlah ratu & ukuran papan</p>
+                </div>
+                <div class="control-group">
+                    <label for="speed">Kecepatan Animasi</label>
+                    <div class="slider-container">
+                        <input type="range" id="speed" min="1" max="100" value="50" class="slider">
+                        <span class="slider-value" id="speed-value">50</span>
+                    </div>
+                    <p class="control-hint">1 = lambat (detail), 100 = cepat</p>
+                </div>
+                <div class="control-group">
+                    <label>Pilih Algoritma</label>
+                    <div class="algo-buttons">
+                        <button class="algo-btn active" id="btn-backtracking" onclick="selectAlgorithm('backtracking')">
+                            <span class="algo-icon">🧠</span>
+                            <span class="algo-name">Backtracking</span>
+                            <span class="algo-tag smart">Smart</span>
+                        </button>
+                        <button class="algo-btn" id="btn-bruteforce" onclick="selectAlgorithm('bruteforce')">
+                            <span class="algo-icon">💪</span>
+                            <span class="algo-name">Brute Force</span>
+                            <span class="algo-tag brute">Semua Dicoba</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-primary" id="btn-start" onclick="startVisualization()">
+                        <span>▶</span> Mulai Visualisasi
+                    </button>
+                    <button class="btn-secondary" id="btn-reset" onclick="resetVisualization()">
+                        <span>↺</span> Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization Area -->
+        <section class="visualization-area">
+            <!-- Chessboard -->
+            <div class="board-container">
+                <div class="board-header">
+                    <h2 id="board-title">♛ Papan Catur 5×5</h2>
+                    <div class="status-badge" id="status-badge">Siap</div>
+                </div>
+                <div class="board-wrapper">
+                    <div class="board" id="chessboard"></div>
+                </div>
+                <div class="board-legend">
+                    <div class="legend-item">
+                        <span class="legend-color safe"></span> Aman
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color conflict"></span> Konflik
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color trying"></span> Sedang Dicoba
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color queen"></span> Ratu Ditempatkan
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Dashboard -->
+            <div class="stats-dashboard">
+                <div class="stat-card" id="stat-steps">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="steps-count">0</div>
+                        <div class="stat-label">Langkah</div>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-backtracks">
+                    <div class="stat-icon">↩️</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="backtracks-count">0</div>
+                        <div class="stat-label">Backtrack</div>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-queens">
+                    <div class="stat-icon">♛</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="queens-count">0</div>
+                        <div class="stat-label">Ratu Aktif</div>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-time">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="time-elapsed">0 ms</div>
+                        <div class="stat-label">Waktu</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Algorithm Explanation -->
+        <section class="explanation-section">
+            <div class="explanation-card" id="explanation-card">
+                <div class="explanation-header">
+                    <h2 id="explanation-title">🧠 Algoritma Backtracking</h2>
+                </div>
+                <div class="explanation-content" id="explanation-content">
+                    <div class="explanation-text">
+                        <h3>Cara Kerja:</h3>
+                        <ol>
+                            <li><strong>Tempatkan ratu</strong> di kolom pertama baris saat ini</li>
+                            <li><strong>Cek</strong> apakah posisi aman (tidak konflik dengan ratu lain)</li>
+                            <li>Jika <strong>aman</strong> → lanjut ke baris berikutnya</li>
+                            <li>Jika <strong>tidak aman</strong> → coba kolom berikutnya</li>
+                            <li>Jika <strong>semua kolom gagal</strong> → <span class="highlight-backtrack">BACKTRACK!</span> (mundur ke baris sebelumnya)</li>
+                            <li>Ulangi sampai semua N ratu berhasil ditempatkan</li>
+                        </ol>
+                    </div>
+                    <div class="explanation-visual">
+                        <div class="complexity-box">
+                            <h4>Kompleksitas</h4>
+                            <div class="complexity-item">
+                                <span class="complexity-label">Waktu (Worst)</span>
+                                <span class="complexity-value">O(N!)</span>
+                            </div>
+                            <div class="complexity-item">
+                                <span class="complexity-label">Ruang</span>
+                                <span class="complexity-value">O(N)</span>
+                            </div>
+                            <div class="complexity-item">
+                                <span class="complexity-label">Pruning</span>
+                                <span class="complexity-value highlight-yes">Ya ✓</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Log Panel -->
+        <section class="log-section">
+            <div class="log-header">
+                <h2>📋 Log Eksekusi</h2>
+                <button class="btn-clear-log" onclick="clearLog()">Bersihkan</button>
+            </div>
+            <div class="log-container" id="log-container">
+                <div class="log-entry log-info">Pilih algoritma dan klik "Mulai Visualisasi" untuk memulai.</div>
+            </div>
+        </section>
+
+        <!-- Comparison Table (shown after both algorithms run) -->
+        <section class="comparison-section" id="comparison-section" style="display: none;">
+            <h2>📊 Hasil Perbandingan</h2>
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Metrik</th>
+                            <th class="col-backtrack">🧠 Backtracking</th>
+                            <th class="col-brute">💪 Brute Force</th>
+                            <th>Pemenang</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Total Langkah</td>
+                            <td id="cmp-bt-steps">-</td>
+                            <td id="cmp-bf-steps">-</td>
+                            <td id="cmp-winner-steps">-</td>
+                        </tr>
+                        <tr>
+                            <td>Jumlah Backtrack</td>
+                            <td id="cmp-bt-backtracks">-</td>
+                            <td id="cmp-bf-backtracks">-</td>
+                            <td id="cmp-winner-backtracks">-</td>
+                        </tr>
+                        <tr>
+                            <td>Waktu Eksekusi</td>
+                            <td id="cmp-bt-time">-</td>
+                            <td id="cmp-bf-time">-</td>
+                            <td id="cmp-winner-time">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="comparison-verdict" id="comparison-verdict"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>IF2211 Strategi Algoritma — Simulasi N-Queens Problem</p>
+        <p class="footer-sub">Brute Force vs Backtracking Visualization</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
